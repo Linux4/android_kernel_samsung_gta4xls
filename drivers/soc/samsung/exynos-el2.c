@@ -37,6 +37,7 @@
 static unsigned long *el2_crash_buf;
 static unsigned long exynos_lv3_table_idx;
 static unsigned long *exynos_lv3_table[EL2_LV3_BUF_MAX];
+static unsigned long *exynos_lv3_table_4MB;
 
 static spinlock_t el2_lock;
 
@@ -411,6 +412,47 @@ static struct platform_driver exynos_el2_driver = {
 	}
 };
 
+static int __init exynos_el2_dynamic_lv3_table_init(void)
+{
+	unsigned long *buf;
+	unsigned long buf_pa;
+	int retry_cnt = MAX_RETRY_COUNT;
+	unsigned long ret;
+
+	do {
+		buf = kzalloc(EL2_LV3_TABLE_BUF_SIZE_4MB, GFP_KERNEL);
+		if (buf != NULL) {
+			exynos_lv3_table_4MB = buf;
+#ifdef CONFIG_DEBUG_KMEMLEAK
+			kmemleak_no_scan(exynos_lv3_table_4MB);
+#endif /* CONFIG_DEBUG_KMEMLEAK */
+			buf_pa = virt_to_phys(buf);
+			pr_info("%s: Allocate 4MB buffer VA[%#llx]/IPA[%#llx]\n",
+					__func__, (unsigned long)buf, buf_pa);
+			break;
+		}
+	} while ((buf == NULL) && (retry_cnt-- > 0));
+
+	if (buf == NULL) {
+		pr_err("%s: Fail to allocate Stage 2 level3 table buffer\n",
+				__func__);
+		return -ENOMEM;
+	}
+
+	ret = exynos_hvc(HVC_FID_SET_EL2_LV3_TABLE_BUF,
+			 buf_pa, EL2_LV3_TABLE_BUF_SIZE_4MB, 0, 0);
+	if (ret) {
+		pr_err("%s: Fail to allocate lv3 table buf ret = %llx\n",
+				__func__, ret);
+		return -EINVAL;
+	}
+
+	pr_info("%s: EL2 dynamic level3 table buffer deliver successfully\n",
+			__func__);
+
+	return 0;
+}
+
 static int __init exynos_el2_crash_info_init(void)
 {
 	unsigned long *buf;
@@ -461,6 +503,13 @@ static int __init exynos_el2_module_init(void)
 	ret = exynos_el2_crash_info_init();
 	if (ret) {
 		pr_err("%s: exynos_el2_crash_info_init fail ret[%d]\n",
+				__func__, ret);
+		return ret;
+	}
+
+	ret = exynos_el2_dynamic_lv3_table_init();
+	if (ret) {
+		pr_err("%s: exynos_el2_dynamic_lv3_table_init fail ret[%d]\n",
 				__func__, ret);
 		return ret;
 	}

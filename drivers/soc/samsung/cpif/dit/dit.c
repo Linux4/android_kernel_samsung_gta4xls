@@ -808,7 +808,6 @@ static int dit_fill_rx_dst_data_buffer(enum dit_desc_ring ring_num, unsigned int
 	struct dit_dst_desc *dst_desc;
 	struct sk_buff **dst_skb;
 	unsigned int dst_rp_pos;
-	gfp_t gfp_mask;
 	int i;
 
 	if (!dc)
@@ -828,7 +827,7 @@ static int dit_fill_rx_dst_data_buffer(enum dit_desc_ring ring_num, unsigned int
 	if (unlikely(!desc_info->dst_skb_buf[ring_num])) {
 		unsigned int buf_size = sizeof(struct sk_buff *) * desc_info->dst_desc_ring_len;
 
-		desc_info->dst_skb_buf[ring_num] = kvzalloc(buf_size, GFP_KERNEL);
+		desc_info->dst_skb_buf[ring_num] = kvzalloc(buf_size, GFP_ATOMIC);
 		if (!desc_info->dst_skb_buf[ring_num]) {
 			mif_err("dit dst[%d] skb container alloc failed\n", ring_num);
 			spin_unlock(&dc->rx_buf_lock);
@@ -839,7 +838,7 @@ static int dit_fill_rx_dst_data_buffer(enum dit_desc_ring ring_num, unsigned int
 	if (dc->use_dma_map && unlikely(!desc_info->dst_skb_buf_daddr[ring_num])) {
 		unsigned int buf_size = sizeof(dma_addr_t) * desc_info->dst_desc_ring_len;
 
-		desc_info->dst_skb_buf_daddr[ring_num] = kvzalloc(buf_size, GFP_KERNEL);
+		desc_info->dst_skb_buf_daddr[ring_num] = kvzalloc(buf_size, GFP_ATOMIC);
 		if (!desc_info->dst_skb_buf_daddr[ring_num]) {
 			mif_err("dit dst[%d] skb dma addr container alloc failed\n", ring_num);
 			spin_unlock(&dc->rx_buf_lock);
@@ -878,13 +877,9 @@ static int dit_fill_rx_dst_data_buffer(enum dit_desc_ring ring_num, unsigned int
 
 			dst_skb[dst_rp_pos] = build_skb(data, len);
 		} else if (initial) {
-			gfp_mask = GFP_KERNEL;
-			if (ring_num == DIT_DST_DESC_RING_0)
-				gfp_mask = GFP_ATOMIC;
-
 			dst_skb[dst_rp_pos] = __netdev_alloc_skb_ip_align(dc->netdev,
 									  desc_info->buf_size,
-									  gfp_mask);
+									  GFP_ATOMIC);
 		} else {
 			dst_skb[dst_rp_pos] = napi_alloc_skb(&dc->napi, desc_info->buf_size);
 		}

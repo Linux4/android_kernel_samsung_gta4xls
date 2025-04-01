@@ -119,6 +119,13 @@ static void iint_init_always(struct integrity_iint_cache *iint,
 
 static void iint_free(struct integrity_iint_cache *iint)
 {
+#ifdef CONFIG_FIVE
+	kfree(iint->five_label);
+	iint->five_label = NULL;
+	iint->five_flags = 0UL;
+	iint->five_status = FIVE_FILE_UNKNOWN;
+	iint->five_signing = false;
+#endif
 	kfree(iint->ima_hash);
 	mutex_destroy(&iint->mutex);
 	kmem_cache_free(iint_cache, iint);

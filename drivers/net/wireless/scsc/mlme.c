@@ -4624,7 +4624,7 @@ int slsi_mlme_read_apf_request(struct slsi_dev *sdev, struct net_device *dev, u8
 	struct sk_buff    *rx;
 	int               r = 0;
 
-	SLSI_MUTEX_LOCK(ndev_vif->vif_mutex);
+	WLBT_WARN_ON(!SLSI_MUTEX_IS_LOCKED(ndev_vif->vif_mutex));
 
 	if (!ndev_vif->activated) {
 		SLSI_ERR(sdev, "ndev_vif is not activated\n");
@@ -4661,7 +4661,6 @@ int slsi_mlme_read_apf_request(struct slsi_dev *sdev, struct net_device *dev, u8
 	*host_dst = fapi_get_data(rx);
 
 exit:
-	SLSI_MUTEX_UNLOCK(ndev_vif->vif_mutex);
 	return r;
 }
 

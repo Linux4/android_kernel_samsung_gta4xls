@@ -91,7 +91,9 @@ static int slsi_send_conn_log_event(struct slsi_dev *sdev)
 	}
 
 	*count_p = buf_count;
+	rtnl_lock();
 	cfg80211_vendor_event(skb, GFP_KERNEL);
+	rtnl_unlock();
 
 	return 0;
 }
@@ -139,11 +141,9 @@ static void conn_log_worker(struct work_struct *work)
 	int status = 0;
 
 	while (p->list && (!(p->stop))) {
-		rtnl_lock();
 		status = slsi_send_conn_log_event(sdev);
 		if (status)
 			SLSI_ERR_NODEV("slsi_send_conn_log_event failed status = %d\n", status);
-		rtnl_unlock();
 	}
 }
 

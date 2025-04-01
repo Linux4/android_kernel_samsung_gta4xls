@@ -3261,6 +3261,8 @@
 					default_mif = <0x00>;
 					default_int = <0x00>;
 					default_cpu = "0-5";
+					rear_single_photo_cam = <0x04>;
+					rear_single_photo_isp = <0x05>;
 					rear_single_photo_mif = <0x03>;
 					rear_single_photo_int = <0x03>;
 					rear_single_photo_cpu = "0-5";
@@ -3368,6 +3370,7 @@
 					triple_capture_mif = <0x00>;
 					triple_capture_int = <0x00>;
 					triple_capture_cpu = "0-5";
+					front_single_photo_cam = <0x04>;
 					front_single_photo_mif = <0x02>;
 					front_single_photo_int = <0x03>;
 					front_single_photo_cpu = "0-5";
@@ -3396,6 +3399,7 @@
 					front_single_video_fhd120_mif = <0x00>;
 					front_single_video_fhd120_int = <0x00>;
 					front_single_video_fhd120_cpu = "0-5";
+					pip_dual_photo_cam = <0x04>;
 					pip_dual_photo_mif = <0x00>;
 					pip_dual_photo_int = <0x00>;
 					pip_dual_photo_cpu = "0-5";

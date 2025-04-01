@@ -204,6 +204,8 @@ obj-$(CONFIG_SPU_VERIFY)        += spu_verify/
 # uH
 obj-$(CONFIG_UH)		+= uh/
 
+obj-y				+= knox/
+
 include $(srctree)/drivers/Makefile.variant1
 obj-y += sec_panel_notifier_v2/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += regulator/pmic_class/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT

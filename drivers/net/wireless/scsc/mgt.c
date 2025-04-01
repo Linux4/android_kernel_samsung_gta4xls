@@ -229,7 +229,7 @@ static ssize_t sysfs_show_version_info(struct kobject *kobj,
 	struct slsi_dev *sdev = slsi_get_sdev();
 	char build_id_fw[128] = {0};
 	char build_id_drv[64] = {0};
-	int buf_size = 256;
+	int buf_size = 512;
 
 #ifndef SLSI_TEST_DEV
 	mxman_get_fw_version(build_id_fw, 128);
@@ -571,7 +571,7 @@ static void write_wifi_version_info_file(struct slsi_dev *sdev)
 #else
 	char *filepath = "/data/misc/conn/.wifiver.info";
 #endif
-	char buf[256];
+	char buf[512];
 	char build_id_fw[128];
 	char build_id_drv[64];
 
@@ -8268,6 +8268,8 @@ u8 *slsi_get_scan_extra_ies(struct slsi_dev *sdev, const u8 *ies, int total_len,
 	while (i < default_ie_len - 2) {
 		id = *(default_ies + i);
 		ie_len = *(default_ies + i + 1);
+		if (cur_len + ie_len + 2 > default_ie_len)
+			break;
 		if (!cfg80211_find_ie(id, ies, total_len)) {
 			memcpy(new_ies + cur_len, default_ies + i, ie_len + 2);
 			cur_len += (ie_len + 2);
